@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.Slider?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.TreeView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
+
+<BorderPane prefHeight="484.0" prefWidth="851.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.zacwood.attics.UIController">
+   <left>
+      <VBox alignment="TOP_CENTER" prefHeight="398.0" prefWidth="203.0" spacing="10.0" BorderPane.alignment="CENTER">
+         <children>
+            <TextField fx:id="date" promptText="YYYY-MM-DD" />
+            <Button fx:id="search" mnemonicParsing="false" onAction="#searchShows" text="Search" />
+            <TreeView fx:id="dateList" prefWidth="183.0" showRoot="false" />
+         </children>
+         <padding>
+            <Insets left="10.0" right="10.0" top="20.0" />
+         </padding>
+      </VBox>
+   </left>
+   <center>
+      <AnchorPane BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefHeight="398.0" prefWidth="496.0" spacing="10.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+               <children>
+                  <VBox prefHeight="398.0" prefWidth="406.0" spacing="10.0" HBox.hgrow="ALWAYS">
+                     <children>
+                        <ListView fx:id="itemList" prefHeight="200.0" prefWidth="248.0" />
+                        <Label fx:id="itemInfo" textOverrun="CLIP" wrapText="true">
+                           <font>
+                              <Font size="15.0" />
+                           </font>
+                           <VBox.margin>
+                              <Insets left="15.0" top="15.0" />
+                           </VBox.margin>
+                        </Label>
+                        <HBox spacing="20.0">
+                           <children>
+                              <Button alignment="BOTTOM_CENTER" mnemonicParsing="false" onAction="#showSongs" text="Open" />
+                              <Button alignment="BOTTOM_CENTER" mnemonicParsing="false" onAction="#downloadItem" text="Download" />
+                           </children>
+                        </HBox>
+                     </children>
+                  </VBox>
+                  <VBox>
+                     <children>
+                        <Label fx:id="selectedItemLabel" wrapText="true">
+                           <font>
+                              <Font size="12.0" />
+                           </font>
+                        </Label>
+                        <ListView fx:id="songList" minWidth="250.0" prefWidth="250.0" />
+                     </children>
+                  </VBox>
+               </children>
+            </HBox>
+         </children>
+      </AnchorPane>
+   </center>
+   <top>
+      <Label fx:id="currentAction" text="Current Action" BorderPane.alignment="CENTER">
+         <BorderPane.margin>
+            <Insets bottom="5.0" top="5.0" />
+         </BorderPane.margin>
+      </Label>
+   </top>
+   <bottom>
+      <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+         <children>
+            <VBox alignment="CENTER" fillWidth="false">
+               <children>
+                  <Label text="Seek" />
+                  <Slider fx:id="seekSlider" />
+               </children>
+               <HBox.margin>
+                  <Insets left="50.0" />
+               </HBox.margin>
+            </VBox>
+            <VBox alignment="CENTER" prefHeight="91.0" prefWidth="332.0" spacing="10.0" HBox.hgrow="ALWAYS">
+               <children>
+                  <Label fx:id="currentSongLabel" text="Song" />
+                  <Label fx:id="currentShowLabel" text="Show" />
+                  <HBox alignment="CENTER" spacing="10.0">
+                     <children>
+                        <Button mnemonicParsing="false" onAction="#playSong" text="Play" />
+                        <Button mnemonicParsing="false" onAction="#pauseSong" text="Pause" />
+                     </children>
+                  </HBox>
+               </children>
+               <padding>
+                  <Insets bottom="10.0" />
+               </padding>
+            </VBox>
+            <VBox alignment="CENTER" fillWidth="false">
+               <children>
+                  <Label text="Volume" />
+                  <Slider fx:id="volumeSlider" value="100.0" />
+               </children>
+               <HBox.margin>
+                  <Insets right="50.0" />
+               </HBox.margin>
+            </VBox>
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>
