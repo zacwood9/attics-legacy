@@ -5,10 +5,13 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
+/**
+ * UI controller class
+ * @author Zachary Wood
+ */
 public class UIController {
 
     @FXML
@@ -30,16 +33,10 @@ public class UIController {
     private Label currentShowLabel;
 
     @FXML
-    private TextField date;
-
-    @FXML
-    private Label selectedShowLabel;
-
-    @FXML
     private Label currentAction;
 
     @FXML
-    private Button serach;
+    private Label currentSongTime;
 
     @FXML
     private Slider volumeSlider;
@@ -125,13 +122,17 @@ public class UIController {
 
             rs.close();
         } catch (SQLException e) {
-            System.out.println(e.getMessage());
+            System.out.println(e.toString());
         }
 
         dateList.setRoot(root);
         dateList.getSelectionModel().selectAll();
         dateList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
 
+        initializeListeners();
+    }
+
+    private void initializeListeners() {
         // when a date is clicked
         dateList.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
             // if the clicked element is not a year
@@ -223,14 +224,6 @@ public class UIController {
     }
 
     /**
-     * Sets seeker bar
-     * @param dur percentage of silder
-     */
-    public void setSeeker(double dur) {
-        seekSlider.setValue(dur * 100);
-    }
-
-    /**
      * Method to display all items for a given show
      *
      * @param show
@@ -288,13 +281,12 @@ public class UIController {
         selectedItemLabel.setText(selectedItem.getIdentifier());
     }
 
-    /**
-     * Method to play the selected song
-     *
-     * @throws Exception
-     */
     @FXML
     private void playSong() throws Exception {
+//        if (mediaController.getCurrentSong() != null) {
+//            mediaController.play(mediaController.getCurrentSong());
+//        }
+//        else
         mediaController.play(selectedSong);
     }
 
@@ -311,8 +303,7 @@ public class UIController {
     }
 
     /**
-     * Method to return a show that has the passed in date
-     *
+     * Returns a show that has the given date
      * @param date
      * @return
      */
@@ -339,10 +330,18 @@ public class UIController {
         this.currentAction.setText(text);
     }
 
-    @FXML
-    public void searchShows() {
-        System.out.println(date.getText());
+    public void setCurrentSongTime(String time) {
+        currentSongTime.setText(time);
     }
+
+    /**
+     * Sets seeker bar
+     * @param dur percentage of silder
+     */
+    public void setSeeker(double dur) {
+        seekSlider.setValue(dur * 100);
+    }
+
 }
 
 

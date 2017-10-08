@@ -18,7 +18,7 @@
       <VBox alignment="TOP_CENTER" prefHeight="398.0" prefWidth="203.0" spacing="10.0" BorderPane.alignment="CENTER">
          <children>
             <TextField fx:id="date" promptText="YYYY-MM-DD" />
-            <Button fx:id="search" mnemonicParsing="false" onAction="#searchShows" text="Search" />
+            <Button fx:id="search" mnemonicParsing="false" text="Search" />
             <TreeView fx:id="dateList" prefWidth="183.0" showRoot="false" />
          </children>
          <padding>
@@ -79,6 +79,7 @@
                <children>
                   <Label text="Seek" />
                   <Slider fx:id="seekSlider" />
+                  <Label fx:id="currentSongTime" />
                </children>
                <HBox.margin>
                   <Insets left="50.0" />

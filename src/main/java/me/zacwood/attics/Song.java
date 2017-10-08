@@ -143,6 +143,6 @@ public class Song {
     }
 
     public boolean equals(Song s) {
-        return s.getFilePath() == filePath;
+        return s.getFilePath() == filePath && s.getTrack() == track;
     }
 }
