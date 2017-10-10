@@ -4,3 +4,7 @@ items
 target
 archive.db
 attics.iml
+.classpath
+.project
+.settings/
+.vscode/
