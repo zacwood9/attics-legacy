@@ -85,6 +85,15 @@ public class Song {
         return filePath;
     }
 
+    public void readyStream() {
+        try {
+            URI uri = new URI(String.format("http://archive.org/download/%s/%s", itemIdentifier, name));
+            mediaPlayer = new MediaPlayer(new Media(uri.toASCIIString()));
+        } catch (Exception e) {
+            System.err.println(e.toString());
+        }
+    }
+
     public void download() {
         try {
             File file = new File(filePath);

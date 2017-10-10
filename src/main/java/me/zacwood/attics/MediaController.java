@@ -50,16 +50,44 @@ public class MediaController {
             // resume if the requested song current song
             if (currentSong.equals(song) && currentSong.getMediaPlayer().getStatus() == MediaPlayer.Status.PAUSED) {
                 currentSong.getMediaPlayer().play();
+                return;
             } else { // if it's a new song, stop the current song
                 currentSong.getMediaPlayer().stop();
             }
         }
 
-        // update the queue
-        setQueueFromSong(song);
+        currentSong = song;
 
-        // add the task to the download queue
-        downloadQueue.submit(downloadAndPlay(song));
+        // update the queue
+        setQueueFromSong(currentSong);
+
+        if (currentSong.getMediaPlayer() == null) {
+            currentSong.readyStream();
+        }
+
+        currentSong.getMediaPlayer().setVolume(volume);
+        uiController.setCurrentSongLabel(currentSong.getTitle());
+        uiController.setCurrentShowLabel(item.getDate());
+        restartSeeker();
+
+        currentSong.getMediaPlayer().play();
+
+        // if there's another song in the queue
+        if (playQueue.size() > 1 && playQueue.get(1) != null) {
+            // download it
+            playQueue.get(1).readyStream();
+
+            // set the next song in the queue to play when current song is finished
+            currentSong.getMediaPlayer().setOnEndOfMedia(() -> {
+                try {
+                    play(playQueue.get(1));
+                } catch (IOException e) {
+                    System.err.println(e.toString());
+                }
+            });
+        }
+
+
     }
 
     public void resume() {
@@ -112,6 +140,7 @@ public class MediaController {
                     uiController.setCurrentShowLabel(item.getDate());
                 });
 
+                // reset the seeker
                 restartSeeker();
 
                 // if there's another song in the queue

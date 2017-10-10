@@ -192,7 +192,6 @@ public class UIController {
         });
         // seek slider listener
         seekSlider.setOnMouseReleased(event -> {
-            System.out.println(seekSlider.getValue() / 100);
             mediaController.seekTo(seekSlider.getValue() / 100);
             mediaController.resume();
 
@@ -288,6 +287,7 @@ public class UIController {
 //        }
 //        else
         mediaController.play(selectedSong);
+
     }
 
     @FXML
