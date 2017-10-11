@@ -61,10 +61,12 @@ public class MediaController {
         // update the queue
         setQueueFromSong(currentSong);
 
+        // ready the stream if there's no mediaplayer
         if (currentSong.getMediaPlayer() == null) {
             currentSong.readyStream();
         }
 
+        // reset UI
         currentSong.getMediaPlayer().setVolume(volume);
         uiController.setCurrentSongLabel(currentSong.getTitle());
         uiController.setCurrentShowLabel(item.getDate());
@@ -115,54 +117,6 @@ public class MediaController {
     ///////////////////////////////////
 
     ///////// Helper methods //////////
-
-    /**
-     * Create a thread that downloads and plays a given song
-     * @param song song to be played
-     * @return Thread
-     */
-    private Thread downloadAndPlay(Song song) {
-        return new Thread(() -> {
-            Platform.runLater(() -> uiController.setCurrentAction("Downloading " + song.getTitle() + "..."));
-            song.download();
-
-            // it's possible that while the song was downloading, another song was pushed to the start of the queue.
-            // to prevent multiple songs or the wrong song from playing,
-            // check if the song that was downloaded is still at the top of the queue
-            if (song.equals(playQueue.get(0))) {
-                currentSong = song;
-                currentSong.getMediaPlayer().setVolume(volume);
-                currentSong.getMediaPlayer().play();
-
-                // update the song and show labels on the main thread
-                Platform.runLater(() -> {
-                    uiController.setCurrentSongLabel(currentSong.getTitle());
-                    uiController.setCurrentShowLabel(item.getDate());
-                });
-
-                // reset the seeker
-                restartSeeker();
-
-                // if there's another song in the queue
-                if (playQueue.size() > 1 && playQueue.get(1) != null) {
-                    Platform.runLater(() -> uiController.setCurrentAction("Downloading " + playQueue.get(1).getTitle() + "..."));
-                    // download it
-                    playQueue.get(1).download();
-
-                    // set the next song in the queue to play when current song is finished
-                    currentSong.getMediaPlayer().setOnEndOfMedia(() -> {
-                        try {
-                            play(playQueue.get(1));
-                        } catch (IOException e) {
-                            System.err.println(e.toString());
-                        }
-                    });
-                }
-
-                Platform.runLater(() -> uiController.setCurrentAction(" "));
-            }
-        });
-    }
 
 
     /**
