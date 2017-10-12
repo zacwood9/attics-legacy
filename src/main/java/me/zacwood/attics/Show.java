@@ -4,32 +4,41 @@ import javafx.scene.control.TreeItem;
 
 import java.util.ArrayList;
 
-public class Show extends TreeItem<String> implements Comparable<Show> {
+public class Show implements Comparable<Show> {
 
+    private int id;
+    private int yearId;
     private String date;
-    private ArrayList<Item> items;
 
-    public Show(String date) {
-        super(date);
+    public Show(int id, int yearId, String date) {
+        this.id = id;
+        this.yearId = yearId;
         this.date = date;
-    }
-
-    public Show(String date, ArrayList<Item> items) {
-        super(date);
-        this.date = date;
-        this.items = items;
     }
 
     public String getDate() {
         return date;
     }
 
-    public ArrayList<Item> getItems() {
-        return items;
+    public int getId() {
+        return id;
     }
 
-    public void setItems(ArrayList<Item> items) {
-        this.items = items;
+    public int getYearId() {
+        return yearId;
+    }
+
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setYearId(int yearId) {
+        this.yearId = yearId;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     @Override

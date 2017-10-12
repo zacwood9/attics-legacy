@@ -3,13 +3,15 @@ package me.zacwood.attics;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.ListView;
 
-import java.sql.*;
-import java.util.*;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.TreeSet;
 
 /**
  * UI controller class
+ *
  * @author Zachary Wood
  */
 public class UIController {
@@ -18,7 +20,7 @@ public class UIController {
     ListView<Year> yearsListView;
 
     @FXML
-    ListView<String> showsListView;
+    ListView<Show> showsListView;
 
     // TODO: make selectable in UI
     private String collection = "GratefulDead";
@@ -38,7 +40,7 @@ public class UIController {
 
         try {
             // iterate through every year
-            while(results.next()) {
+            while (results.next()) {
                 // add it to the set
                 int id = results.getInt("id");
                 String year = results.getString("year");
@@ -48,6 +50,7 @@ public class UIController {
             ObservableList<Year> yearList = FXCollections.observableArrayList();
             yearList.addAll(years);
 
+            // add the set to the list view
             yearsListView.setItems(yearList);
             yearsListView.setCellFactory(param -> new YearListViewCell());
 
@@ -56,7 +59,37 @@ public class UIController {
             e.printStackTrace();
         }
 
+        initializeListeners();
 
+    }
+
+    public void initializeListeners() {
+        yearsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            int yearId = newValue.getId();
+            ResultSet results = Database.getInstance().rawSQL("SELECT * FROM shows WHERE yearId=" + yearId);
+
+            TreeSet<Show> shows = new TreeSet<>();
+            try {
+                // iterate through every show
+                while (results.next()) {
+                    // add it to the set
+                    int id = results.getInt("id");
+                    String date = results.getString("date");
+                    shows.add(new Show(id, yearId, date));
+                }
+
+                ObservableList<Show> showList = FXCollections.observableArrayList();
+                showList.addAll(shows);
+
+                // add the set to the list view
+                showsListView.setItems(showList);
+                showsListView.setCellFactory(param -> new ShowListViewCell());
+
+                results.close();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }));
     }
 
 //     public void initialize() {
