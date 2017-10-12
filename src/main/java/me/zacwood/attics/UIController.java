@@ -25,58 +25,38 @@ public class UIController {
 
     private MediaController mediaController;
 
-    private Connection conn;
-
     public UIController() {
-        // connect to DB
-        try {
-            String url = "jdbc:sqlite:archive.db";
-            conn = DriverManager.getConnection(url);
-        } catch (SQLException e) {
-            System.out.println(e.toString());
-        }
+
     }
 
     public void initialize() {
         // populate year list
-        System.out.println("year");
         TreeSet<Year> years = new TreeSet<>();
-        try {
-            Statement stmt = conn.createStatement();
-            String sql = String.format("SELECT * FROM years", collection);
-            ResultSet results = stmt.executeQuery(sql);
 
+        String sql = String.format("SELECT * FROM years WHERE collection='%s'", collection);
+        ResultSet results = Database.getInstance().rawSQL(sql);
+
+        try {
             // iterate through every year
             while(results.next()) {
                 // add it to the set
                 int id = results.getInt("id");
                 String year = results.getString("year");
-                System.out.println(year);
                 years.add(new Year(id, year, collection));
             }
 
             ObservableList<Year> yearList = FXCollections.observableArrayList();
-            for(Year year : years) {
-                yearList.add(year);
-                System.out.println(year.getYear());
-            }
+            yearList.addAll(years);
+
             yearsListView.setItems(yearList);
-            yearsListView.setCellFactory(param -> new ListCell<Year>() {
-                @Override
-                protected void updateItem(Year item, boolean empty) {
-                    super.updateItem(item, empty);
+            yearsListView.setCellFactory(param -> new YearListViewCell());
 
-                    if (empty || item == null || item.getYear() == null) {
-                        setText(null);
-                    } else {
-                        setText(item.getYear());
-                    }
-                }
-            });
-
+            results.close();
         } catch (SQLException e) {
-            System.err.println(e.toString());
+            e.printStackTrace();
         }
+
+
     }
 
 //     public void initialize() {
