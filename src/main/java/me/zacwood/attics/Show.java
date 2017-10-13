@@ -9,11 +9,13 @@ public class Show implements Comparable<Show> {
     private int id;
     private int yearId;
     private String date;
+    private String venue;
 
-    public Show(int id, int yearId, String date) {
+    public Show(int id, int yearId, String date, String venue) {
         this.id = id;
         this.yearId = yearId;
         this.date = date;
+        this.venue = venue;
     }
 
     public String getDate() {
@@ -39,6 +41,10 @@ public class Show implements Comparable<Show> {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getVenue() {
+        return venue;
     }
 
     @Override

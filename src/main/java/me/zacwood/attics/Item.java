@@ -11,30 +11,30 @@ import java.io.*;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Item extends TableRow<String> implements Comparable<Item> {
+public class Item implements Comparable<Item> {
 
+    private int id;
     private String identifier;
-    private String date;
+    private int numReviews;
     private int downloads;
     private String avgRating;
     private String description;
+    private String source;
     private JsonObject metadata;
     private List<Song> songs;
 
-    public Item(String identifier, String date, int downloads, String avgRating, String description) {
+    public Item(int id, String identifier, int downloads, String avgRating, int numReviews, String description, String source) {
+        this.id = id;
         this.identifier = identifier;
-        this.date = date;
+        this.numReviews = numReviews;
         this.downloads = downloads;
         this.avgRating = avgRating;
         this.description = description;
+        this.source = source;
     }
 
     public String getIdentifier() {
         return identifier;
-    }
-
-    public String getDate() {
-        return date;
     }
 
     public int getDownloads() {
@@ -113,6 +113,18 @@ public class Item extends TableRow<String> implements Comparable<Item> {
         return songs;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public int getNumReviews() {
+        return numReviews;
+    }
+
+    public String getSource() {
+        return source;
+    }
+
     /**
      * @param song
      * @return index of song in this item's song array
@@ -125,8 +137,8 @@ public class Item extends TableRow<String> implements Comparable<Item> {
     }
 
     public String toString() {
-        return String.format("Identifier: %s\n\nDate: %s\n\nDownloads: %d\n\nAverage Rating: %s",
-                identifier, date, downloads, avgRating);
+        return String.format("Identifier: %s\n\nDownloads: %d\n\nAverage Rating: %s",
+                identifier, downloads, avgRating);
     }
 
     @Override

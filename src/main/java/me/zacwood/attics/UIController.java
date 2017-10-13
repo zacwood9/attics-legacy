@@ -22,6 +22,9 @@ public class UIController {
     @FXML
     ListView<Show> showsListView;
 
+    @FXML
+    ListView<Item> itemsListView;
+
     // TODO: make selectable in UI
     private String collection = "GratefulDead";
 
@@ -65,6 +68,8 @@ public class UIController {
 
     public void initializeListeners() {
         yearsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+//            showsListView.setItems(FXCollections.observableArrayList());
+//            itemsListView.setItems(FXCollections.observableArrayList());
             int yearId = newValue.getId();
             ResultSet results = Database.getInstance().rawSQL("SELECT * FROM shows WHERE yearId=" + yearId);
 
@@ -75,7 +80,8 @@ public class UIController {
                     // add it to the set
                     int id = results.getInt("id");
                     String date = results.getString("date");
-                    shows.add(new Show(id, yearId, date));
+                    String venue = results.getString("venue");
+                    shows.add(new Show(id, yearId, date, venue));
                 }
 
                 ObservableList<Show> showList = FXCollections.observableArrayList();
@@ -90,6 +96,41 @@ public class UIController {
                 e.printStackTrace();
             }
         }));
+
+        showsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            if (newValue != null) {
+                int showId = newValue.getId();
+                ResultSet results = Database.getInstance().rawSQL("SELECT * FROM items WHERE showId=" + showId);
+
+                TreeSet<Item> items = new TreeSet<>();
+                try {
+                    // iterate through every show
+                    while (results.next()) {
+                        // add it to the set
+                        int id = results.getInt("id");
+                        String identifier = results.getString("identifier");
+                        int downloads = results.getInt("downloads");
+                        int numReviews = results.getInt("num_reviews");
+                        String avgRating = results.getString("avg_rating");
+                        String description = results.getString("description");
+                        String source = results.getString("source");
+                        items.add(new Item(id, identifier, downloads, avgRating, numReviews, description, source));
+                    }
+
+                    ObservableList<Item> itemList = FXCollections.observableArrayList();
+                    itemList.addAll(items);
+
+                    // add the set to the list view
+                    itemsListView.setItems(itemList);
+                    itemsListView.setCellFactory(param -> new ItemListViewCell());
+
+                    results.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }));
+
     }
 
 //     public void initialize() {

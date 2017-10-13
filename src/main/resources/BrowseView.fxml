@@ -108,7 +108,7 @@
                               <Color blue="0.624" green="0.624" red="0.624" fx:id="x21" />
                            </textFill>
                         </Label>
-                        <ListView prefHeight="271.0" prefWidth="445.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
+                        <ListView fx:id="itemsListView" prefHeight="271.0" prefWidth="445.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
                      </children>
                   </AnchorPane>
                 <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
