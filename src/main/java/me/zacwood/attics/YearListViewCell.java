@@ -11,6 +11,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class YearListViewCell extends ListCell<Year> {
+    
+    private FXMLLoader loader;
+    
     @FXML
     private Label year;
 
@@ -28,9 +31,12 @@ public class YearListViewCell extends ListCell<Year> {
             setText(null);
         } else {
             try {
-                FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("YearListViewCell.fxml"));
-                loader.setController(this);
-                loader.load();
+                if (loader == null) {
+                    System.out.println("loading year cell");
+                    loader = new FXMLLoader(getClass().getClassLoader().getResource("YearListViewCell.fxml"));
+                    loader.setController(this);
+                    loader.load();
+                }
             } catch (IOException e) {
                 System.err.println(e.toString());
             }

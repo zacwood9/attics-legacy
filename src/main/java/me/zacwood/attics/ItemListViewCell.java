@@ -12,6 +12,8 @@ import java.sql.SQLException;
 
 public class ItemListViewCell extends ListCell<Item>{
 
+    private FXMLLoader loader;
+
     @FXML
     private Label identifier;
 
@@ -30,15 +32,18 @@ public class ItemListViewCell extends ListCell<Item>{
 
         if (empty || item == null) {
             setText(null);
+            setGraphic(null);
         } else {
-            try {
-                FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("ItemListViewCell.fxml"));
-                loader.setController(this);
-                loader.load();
-            } catch (IOException e) {
-                System.err.println(e.toString());
+            if (loader == null ) {
+                try {
+                    System.out.println("loading item cell");
+                    loader = new FXMLLoader(getClass().getClassLoader().getResource("ItemListViewCell.fxml"));
+                    loader.setController(this);
+                    loader.load();
+                } catch (IOException e) {
+                    System.err.println(e.toString());
+                }
             }
-
             // set downloads and identifier fields
             String source = "Default";
 

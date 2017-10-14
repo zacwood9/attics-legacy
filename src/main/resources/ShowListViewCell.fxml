@@ -24,7 +24,7 @@
             <Pane prefHeight="0.0" prefWidth="59.0" />
          </children>
       </HBox>
-      <Label fx:id="rating" text="Rating: " textAlignment="CENTER">
+      <Label fx:id="numberOfItems" text="Rating: " textAlignment="CENTER">
          <font>
             <Font size="14.0" />
          </font>

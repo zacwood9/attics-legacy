@@ -98,6 +98,7 @@ public class UIController {
         }));
 
         showsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            //itemsListView.setItems(FXCollections.observableArrayList());
             if (newValue != null) {
                 int showId = newValue.getId();
                 ResultSet results = Database.getInstance().rawSQL("SELECT * FROM items WHERE showId=" + showId);
