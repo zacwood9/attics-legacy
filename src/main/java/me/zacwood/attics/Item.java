@@ -49,28 +49,32 @@ public class Item implements Comparable<Item> {
         return description;
     }
 
-    private void loadMetadata() throws IOException {
+    private void loadMetadata() {
         String requestUrl = "http://archive.org/metadata/" + identifier;
 
-        // get the metadata for the item as a json stream
-        InputStream jsonStream = Request.Get(requestUrl).execute().returnContent().asStream();
+        try {
+            // get the metadata for the item as a json stream
+            InputStream jsonStream = Request.Get(requestUrl).execute().returnContent().asStream();
 
-        BufferedReader streamReader = new BufferedReader(new InputStreamReader(jsonStream));
+            BufferedReader streamReader = new BufferedReader(new InputStreamReader(jsonStream));
 
-        StringBuilder result = new StringBuilder();
-        String line;
+            StringBuilder result = new StringBuilder();
+            String line;
 
-        // read each line of the stream
-        while ((line = streamReader.readLine()) != null) {
-            result.append(line);
+            // read each line of the stream
+            while ((line = streamReader.readLine()) != null) {
+                result.append(line);
+            }
+            streamReader.close();
+
+            JsonReader jsonReader = Json.createReader(new StringReader(result.toString()));
+            metadata = jsonReader.readObject();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        streamReader.close();
-
-        JsonReader jsonReader = Json.createReader(new StringReader(result.toString()));
-        metadata = jsonReader.readObject();
     }
 
-    private JsonObject getMetadata() throws IOException {
+    private JsonObject getMetadata() {
         if (metadata != null) {
             return metadata;
         }
@@ -84,7 +88,7 @@ public class Item implements Comparable<Item> {
      * @return LinkedList of Song objects of all songs in the item
      * @throws IOException
      */
-    public List<Song> getSongs() throws IOException {
+    public List<Song> getSongs()  {
         if (songs != null) return songs;
 
         songs = new LinkedList<>();
@@ -130,7 +134,7 @@ public class Item implements Comparable<Item> {
      * @return index of song in this item's song array
      */
     public int indexOfSong(Song song) {
-        for (int i = 0; i < songs.size(); i++) {
+        for (int i = 0; i < getSongs().size(); i++) {
             if(song.equals(songs.get(i))) return i;
         }
         return -1;

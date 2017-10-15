@@ -36,7 +36,6 @@ public class ItemListViewCell extends ListCell<Item>{
         } else {
             if (loader == null ) {
                 try {
-                    System.out.println("loading item cell");
                     loader = new FXMLLoader(getClass().getClassLoader().getResource("ItemListViewCell.fxml"));
                     loader.setController(this);
                     loader.load();

@@ -32,7 +32,6 @@ public class YearListViewCell extends ListCell<Year> {
         } else {
             try {
                 if (loader == null) {
-                    System.out.println("loading year cell");
                     loader = new FXMLLoader(getClass().getClassLoader().getResource("YearListViewCell.fxml"));
                     loader.setController(this);
                     loader.load();

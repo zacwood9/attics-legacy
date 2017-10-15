@@ -26,30 +26,20 @@ public class ShowListViewCell extends ListCell<Show> {
     @FXML
     private Label venue;
 
-    private int itemNum;
+    private int itemNum = -1;
 
     @FXML
     private VBox vBox;
 
-    public ShowListViewCell(int id) {
+    public ShowListViewCell() {
         setLoader();
 
         // TODO: move to update, add null check 
-        String sql = String.format("SELECT COUNT(*) AS total FROM items where showId=%d", show.getId());
-        ResultSet result = Database.getInstance().rawSQL(sql);
-        try {
-            result.next();
-            int num = result.getInt("total");
-            itemNum = num;
-            result.close();
-        } catch (SQLException e) {
-            System.err.println(e.toString());
-        }
+
     }
 
     private void setLoader() {
         try {
-            System.out.println("loading show cell");
             loader = new FXMLLoader(getClass().getClassLoader().getResource("ShowListViewCell.fxml"));
             loader.setController(this);
             loader.load();
@@ -90,6 +80,19 @@ public class ShowListViewCell extends ListCell<Show> {
             // }
             // double avg = sum / count;
             // rating.setText(String.format("Rating: %.02f / 5", avg));
+
+            if (itemNum == -1) {
+                String sql = String.format("SELECT COUNT(*) AS total FROM items where showId=%d", show.getId());
+                ResultSet result = Database.getInstance().rawSQL(sql);
+                try {
+                    result.next();
+                    itemNum = result.getInt("total");
+                    result.close();
+                } catch (SQLException e) {
+                    System.err.println(e.toString());
+                }
+            }
+
             numberOfItems.setText(itemNum + " recordings");
             //rating.setText("");
             venue.setText(show.getVenue());

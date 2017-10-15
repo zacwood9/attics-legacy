@@ -3,10 +3,15 @@ package me.zacwood.attics;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.control.Slider;
+import javafx.scene.media.MediaPlayer;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 import java.util.TreeSet;
 
 /**
@@ -25,13 +30,34 @@ public class UIController {
     @FXML
     ListView<Item> itemsListView;
 
+    @FXML
+    ListView<Song> songsListView;
+
+    @FXML
+    Slider seekSlider;
+
+    @FXML
+    Slider volumeSlider;
+
+    @FXML
+    Label songLabel;
+
+    @FXML
+    Label showLabel;
+
+    @FXML
+    Label seekerText;
+
+    @FXML
+    Button playPauseButton;
+
     // TODO: make selectable in UI
     private String collection = "GratefulDead";
 
     private MediaController mediaController;
 
     public UIController() {
-
+        mediaController = new MediaController(this);
     }
 
     public void initialize() {
@@ -67,9 +93,10 @@ public class UIController {
     }
 
     public void initializeListeners() {
+
+        // when a year is clicked
         yearsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
-//            showsListView.setItems(FXCollections.observableArrayList());
-//            itemsListView.setItems(FXCollections.observableArrayList());
+
             int yearId = newValue.getId();
             ResultSet results = Database.getInstance().rawSQL("SELECT * FROM shows WHERE yearId=" + yearId);
 
@@ -97,6 +124,7 @@ public class UIController {
             }
         }));
 
+        // when a show is clicked
         showsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
             //itemsListView.setItems(FXCollections.observableArrayList());
             if (newValue != null) {
@@ -108,14 +136,8 @@ public class UIController {
                     // iterate through every show
                     while (results.next()) {
                         // add it to the set
-                        int id = results.getInt("id");
-                        String identifier = results.getString("identifier");
-                        int downloads = results.getInt("downloads");
-                        int numReviews = results.getInt("num_reviews");
-                        String avgRating = results.getString("avg_rating");
-                        String description = results.getString("description");
-                        String source = results.getString("source");
-                        items.add(new Item(id, identifier, downloads, avgRating, numReviews, description, source));
+
+                        items.add(Database.itemFromResult(results));
                     }
 
                     ObservableList<Item> itemList = FXCollections.observableArrayList();
@@ -125,6 +147,11 @@ public class UIController {
                     itemsListView.setItems(itemList);
                     itemsListView.setCellFactory(param -> new ItemListViewCell());
 
+                    if (!itemsListView.isVisible()) {
+                        songsListView.setVisible(false);
+                        itemsListView.setVisible(true);
+                    }
+
                     results.close();
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -132,6 +159,87 @@ public class UIController {
             }
         }));
 
+        // when an item is clicked
+        itemsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
+            //itemsListView.setItems(FXCollections.observableArrayList());
+            if (newValue != null) {
+                displaySongList(newValue);
+            }
+        }));
+
+        // volume slider listener
+        volumeSlider.valueProperty().addListener(observable -> mediaController.setVolume(volumeSlider.getValue() / 100));
+
+        seekSlider.setOnMousePressed(event -> {
+            mediaController.pause();
+        });
+        // seek slider listener
+        seekSlider.setOnMouseReleased(event -> {
+            mediaController.seekTo(seekSlider.getValue() / 100);
+            mediaController.resume();
+
+        });
+
+        // double click listener for songs
+        songsListView.setOnMouseClicked(event -> {
+            if (event.getClickCount() == 2) {
+                try {
+                    mediaController.play(songsListView.getSelectionModel().getSelectedItem());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+            }
+        });
+
+        playPauseButton.setOnAction(event -> {
+            if (mediaController.getPlayingSong().getMediaPlayer().getStatus() == MediaPlayer.Status.PLAYING) {
+                mediaController.pause();
+                playPauseButton.setText("Play");
+            } else {
+                mediaController.play(mediaController.getPlayingSong());
+                playPauseButton.setText("Pause");
+            }
+        });
+
+
+    }
+
+    private void displaySongList(Item item) {
+        List<Song> songs = item.getSongs();
+        ObservableList<Song> songObservableList = FXCollections.observableArrayList();
+        songObservableList.addAll(songs);
+        songsListView.setItems(songObservableList);
+        songsListView.setCellFactory(param -> new SongListViewCell());
+        itemsListView.setVisible(false);
+        songsListView.setVisible(true);
+
+    }
+
+
+    /**
+     * Sets seeker bar
+     *
+     * @param dur percentage of silder
+     */
+    public void setSeekerPosition(double dur) {
+        seekSlider.setValue(dur * 100);
+    }
+
+    public void setSeekerText(String text) {
+        seekerText.setText(text);
+    }
+
+
+    public void setSong(Song song) {
+        setSeekerPosition(0);
+        songLabel.setText(song.getTitle());
+        showLabel.setText(song.getAlbum());
+        playPauseButton.setText("Pause");
+    }
+
+    public void setPlayPauseText(String text) {
+        playPauseButton.setText(text);
     }
 
 //     public void initialize() {
@@ -399,13 +507,6 @@ public class UIController {
 //         currentSongTime.setText(time);
 //     }
 
-//     /**
-//      * Sets seeker bar
-//      * @param dur percentage of silder
-//      */
-//     public void setSeeker(double dur) {
-//         seekSlider.setValue(dur * 100);
-//     }
 
 }
 
