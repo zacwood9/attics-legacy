@@ -13,6 +13,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.List;
+import java.util.LinkedList;
+import java.util.Collections;
 
 /**
  * UI controller class
@@ -62,7 +65,7 @@ public class UIController {
 
     public void initialize() {
         // populate year list
-        TreeSet<Year> years = new TreeSet<>();
+        List<Year> years = new LinkedList<>();
 
         String sql = String.format("SELECT * FROM years WHERE collection='%s'", collection);
         ResultSet results = Database.getInstance().rawSQL(sql);
@@ -75,6 +78,8 @@ public class UIController {
                 String year = results.getString("year");
                 years.add(new Year(id, year, collection));
             }
+
+            Collections.sort(years);
 
             ObservableList<Year> yearList = FXCollections.observableArrayList();
             yearList.addAll(years);
@@ -100,7 +105,7 @@ public class UIController {
             int yearId = newValue.getId();
             ResultSet results = Database.getInstance().rawSQL("SELECT * FROM shows WHERE yearId=" + yearId);
 
-            TreeSet<Show> shows = new TreeSet<>();
+            List<Show> shows = new LinkedList<>();
             try {
                 // iterate through every show
                 while (results.next()) {
@@ -110,6 +115,8 @@ public class UIController {
                     String venue = results.getString("venue");
                     shows.add(new Show(id, yearId, date, venue));
                 }
+
+                Collections.sort(shows);
 
                 ObservableList<Show> showList = FXCollections.observableArrayList();
                 showList.addAll(shows);
@@ -131,14 +138,15 @@ public class UIController {
                 int showId = newValue.getId();
                 ResultSet results = Database.getInstance().rawSQL("SELECT * FROM items WHERE showId=" + showId);
 
-                TreeSet<Item> items = new TreeSet<>();
+                List<Item> items = new LinkedList<>();
                 try {
                     // iterate through every show
                     while (results.next()) {
                         // add it to the set
-
                         items.add(Database.itemFromResult(results));
                     }
+
+                    Collections.sort(items);
 
                     ObservableList<Item> itemList = FXCollections.observableArrayList();
                     itemList.addAll(items);
