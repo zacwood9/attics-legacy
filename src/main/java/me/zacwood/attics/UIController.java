@@ -184,7 +184,7 @@ public class UIController {
         // seek slider listener
         seekSlider.setOnMouseReleased(event -> {
             mediaController.seekTo(seekSlider.getValue() / 100);
-            mediaController.resume();
+            mediaController.play(mediaController.getPlayingSong());
 
         });
 
