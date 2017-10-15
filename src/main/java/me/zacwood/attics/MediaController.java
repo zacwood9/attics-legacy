@@ -2,25 +2,26 @@ package me.zacwood.attics;
 
 import javafx.application.Platform;
 import javafx.scene.media.MediaPlayer;
-import javafx.util.Duration;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Media controller for Attics UI
+ *
  * @author Zachary Wood
  */
 public class MediaController {
 
-    private Item item;
     private ExecutorService downloadQueue;
     private List<Song> playQueue;
-    private Song currentSong;
+    private Song playingSong;
+    private Item playingItem;
 
     private UIController uiController;
 
@@ -41,38 +42,43 @@ public class MediaController {
 
     /**
      * Method to play a given song.
+     *
      * @param song
      */
-    public void play(Song song) throws IOException {
+    public void play(Song song)  {
 
         // if there's a current song
-        if (currentSong != null) {
+        if (playingSong != null) {
             // resume if the requested song current song
-            if (currentSong.equals(song) && currentSong.getMediaPlayer().getStatus() == MediaPlayer.Status.PAUSED) {
-                currentSong.getMediaPlayer().play();
+            if (playingSong.equals(song) && playingSong.getMediaPlayer().getStatus() == MediaPlayer.Status.PAUSED) {
+                playingSong.getMediaPlayer().play();
                 return;
             } else { // if it's a new song, stop the current song
-                currentSong.getMediaPlayer().stop();
+                playingSong.getMediaPlayer().stop();
             }
         }
 
-        currentSong = song;
+        playingSong = song;
+
+        if (playingItem == null || !playingItem.getIdentifier().equals(playingSong.getItemIdentifier())) {
+            playingItem = Database.getInstance().getItemWithIdentifier(playingSong.getItemIdentifier());
+        }
 
         // update the queue
-        setQueueFromSong(currentSong);
+        setQueueFromSong(playingSong);
 
         // ready the stream if there's no mediaplayer
-        if (currentSong.getMediaPlayer() == null) {
-            currentSong.readyStream();
+        if (playingSong.getMediaPlayer() == null) {
+            playingSong.readyStream();
         }
 
         // reset UI
-        currentSong.getMediaPlayer().setVolume(volume);
-        uiController.setCurrentSongLabel(currentSong.getTitle());
-        uiController.setCurrentShowLabel(item.getDate());
+        playingSong.getMediaPlayer().setVolume(volume);
+        uiController.setSong(playingSong);
+
         restartSeeker();
 
-        currentSong.getMediaPlayer().play();
+        playingSong.getMediaPlayer().play();
 
         // if there's another song in the queue
         if (playQueue.size() > 1 && playQueue.get(1) != null) {
@@ -80,38 +86,32 @@ public class MediaController {
             playQueue.get(1).readyStream();
 
             // set the next song in the queue to play when current song is finished
-            currentSong.getMediaPlayer().setOnEndOfMedia(() -> {
-                try {
-                    play(playQueue.get(1));
-                } catch (IOException e) {
-                    System.err.println(e.toString());
-                }
-            });
+            playingSong.getMediaPlayer().setOnEndOfMedia(() -> play(playQueue.get(1)));
         }
 
 
     }
 
     public void resume() {
-        if (currentSong != null) {
-            currentSong.getMediaPlayer().play();
+        if (playingSong != null) {
+            playingSong.getMediaPlayer().play();
         }
     }
 
     public void pause() {
-        if (currentSong != null) {
-            currentSong.getMediaPlayer().pause();
+        if (playingSong != null) {
+            playingSong.getMediaPlayer().pause();
         }
     }
 
     public void seekTo(double time) {
-        currentSong.getMediaPlayer().seek(currentSong.getMediaPlayer().getTotalDuration().multiply(time));
+        playingSong.getMediaPlayer().seek(playingSong.getMediaPlayer().getTotalDuration().multiply(time));
     }
 
     public void setVolume(double volume) {
         this.volume = volume;
-        if (currentSong != null && currentSong.getMediaPlayer() != null)
-            Platform.runLater(() -> currentSong.getMediaPlayer().setVolume(this.volume));
+        if (playingSong != null && playingSong.getMediaPlayer() != null)
+            Platform.runLater(() -> playingSong.getMediaPlayer().setVolume(this.volume));
     }
 
     ///////////////////////////////////
@@ -124,8 +124,8 @@ public class MediaController {
      */
     private String doubleToMinutes(double time) {
         double decimal = time - Math.floor(time);
-        int seconds = (int)((decimal / 10 * 60) * 10);
-        int minutes = (int)time;
+        int seconds = (int) ((decimal / 10 * 60) * 10);
+        int minutes = (int) time;
         return String.format("%d:%02d", minutes, seconds);
     }
 
@@ -133,8 +133,6 @@ public class MediaController {
      * Restarts seeker at 0 and sets it to update every second
      */
     private void restartSeeker() {
-        // reset the seeker to 0
-        Platform.runLater(() -> uiController.setSeeker(0));
 
         // cancel the current timer
         if (seekUpdater != null) seekUpdater.cancel();
@@ -144,13 +142,13 @@ public class MediaController {
         TimerTask t = new TimerTask() {
             @Override
             public void run() {
-                if (currentSong != null && currentSong.getMediaPlayer().getStatus() == MediaPlayer.Status.PLAYING) {
-                    double percent = currentSong.getMediaPlayer().getCurrentTime().toMillis() / currentSong.getMediaPlayer().getTotalDuration().toMillis();
-                    Platform.runLater( () -> {
-                        uiController.setSeeker(percent);
-                        double current = currentSong.getMediaPlayer().getCurrentTime().toMinutes();
-                        double total = currentSong.getMediaPlayer().getTotalDuration().toMinutes();
-                        uiController.setCurrentSongTime(String.format("%s - %s", doubleToMinutes(current), doubleToMinutes(total)));
+                if (playingSong != null && playingSong.getMediaPlayer().getStatus() == MediaPlayer.Status.PLAYING) {
+                    double percent = playingSong.getMediaPlayer().getCurrentTime().toMillis() / playingSong.getMediaPlayer().getTotalDuration().toMillis();
+                    Platform.runLater(() -> {
+                        uiController.setSeekerPosition(percent);
+                        double current = playingSong.getMediaPlayer().getCurrentTime().toMinutes();
+                        double total = playingSong.getMediaPlayer().getTotalDuration().toMinutes();
+                        uiController.setSeekerText(String.format("%s - %s", doubleToMinutes(current), doubleToMinutes(total)));
                     });
 
                 }
@@ -163,31 +161,32 @@ public class MediaController {
 
     /**
      * Method that updates the song queue to start with the given song and end at the end of the item
+     *
      * @param song
      * @throws IOException
      */
-    private void setQueueFromSong(Song song) throws IOException {
-        int indexOfSong = item.indexOfSong(song);
+    private void setQueueFromSong(Song song) {
+        int indexOfSong = playingItem.indexOfSong(song);
         playQueue.clear();
 
         // add the rest of the songs in the item to the play queue
-        for (int i = indexOfSong; i < item.getSongs().size(); i++) {
-            playQueue.add(item.getSongs().get(i));
+        for (int i = indexOfSong; i < playingItem.getSongs().size(); i++) {
+            playQueue.add(playingItem.getSongs().get(i));
         }
     }
 
     ///////////////////////////////////
 
-    public Song getCurrentSong() {
-        return currentSong;
+    public Song getPlayingSong() {
+        return playingSong;
     }
 
-    public Item getItem() {
-        return item;
+    public Item getPlayingItem() {
+        return playingItem;
     }
 
-    public void setItem(Item item) throws Exception {
-        this.item = item;
+    public void setPlayingItem(Item item) throws Exception {
+        this.playingItem = item;
     }
 
 
