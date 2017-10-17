@@ -11,7 +11,7 @@ public class Database {
     private Database() {
         // connect to DB
         try {
-            String url = "jdbc:sqlite:archive.db";
+            String url = "jdbc:sqlite::resource:archive.db";
             conn = DriverManager.getConnection(url);
         } catch (SQLException e) {
             System.out.println(e.toString());
