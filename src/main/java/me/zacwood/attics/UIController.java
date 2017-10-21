@@ -220,7 +220,6 @@ public class UIController {
      */
     private void displaySongList(Item item) {
         // hide item list, show loading text
-        itemsListView.setVisible(false);
         status.setText("Loading " + item.getIdentifier() + "...");
 
         ObservableList<Song> songObservableList = FXCollections.observableArrayList();
@@ -247,6 +246,9 @@ public class UIController {
             songsListView.setCellFactory(param -> new SongListViewCell());
 
             // display song list
+            itemsListView.setVisible(false);
+
+            songsListView.getSelectionModel().clearSelection();
             songsListView.setVisible(true);
             otherSources.setVisible(true);
             status.setText("");
