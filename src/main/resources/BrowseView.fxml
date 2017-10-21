@@ -31,13 +31,13 @@
                 <Color blue="0.624" green="0.624" red="0.624" fx:id="x2" />
               </textFill>
             </Label>
-                  <ListView fx:id="yearsListView" layoutX="13.0" layoutY="175.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
+                  <ListView fx:id="yearsListView" layoutX="13.0" layoutY="175.0" prefHeight="200.0" prefWidth="200.0" stylesheets="@listview.css" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
           </children>
         </AnchorPane>
       <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0">
         <children>
           <Label alignment="CENTER" font="$x1" layoutX="14.0" layoutY="14.0" style="&#10;" text="Shows" textAlignment="CENTER" textFill="$x2" wrapText="false" />
-                  <ListView fx:id="showsListView" layoutX="112.0" layoutY="46.0" prefHeight="499.0" prefWidth="430.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
+                  <ListView fx:id="showsListView" layoutX="112.0" layoutY="46.0" prefHeight="499.0" prefWidth="430.0" stylesheets="@listview.css" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
         </children>
       </AnchorPane>
             <SplitPane dividerPositions="0.6775956284153005" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
@@ -52,8 +52,8 @@
                               <Color blue="0.624" green="0.624" red="0.624" fx:id="x21" />
                            </textFill>
                         </Label>
-                        <ListView fx:id="itemsListView" prefHeight="271.0" prefWidth="445.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
-                        <ListView fx:id="songsListView" layoutX="10.0" layoutY="10.0" prefHeight="271.0" prefWidth="445.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
+                        <ListView fx:id="itemsListView" prefHeight="271.0" prefWidth="445.0" stylesheets="@listview.css" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
+                        <ListView fx:id="songsListView" layoutX="10.0" layoutY="10.0" prefHeight="271.0" prefWidth="445.0" stylesheets="@listview.css" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
                         <Label fx:id="loading" alignment="CENTER" layoutX="14.0" layoutY="189.0" style="&#10;" text="Loading..." textAlignment="CENTER" textFill="#9f9f9f" visible="false" wrapText="false">
                            <font>
                               <Font size="16.0" fx:id="x111" />
@@ -92,4 +92,7 @@
       </items>
     </SplitPane>
   </children>
+   <padding>
+      <Insets top="5.0" />
+   </padding>
 </VBox>

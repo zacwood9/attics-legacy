@@ -1,0 +1,7 @@
+.list-view {
+    -fx-background-insets: 0;
+    -fx-padding: 0;
+}
+.increment-button, .decrement-button, .thumb, .track {
+    -fx-opacity: .5;
+}

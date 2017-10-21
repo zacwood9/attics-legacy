@@ -17,7 +17,7 @@ public class Main extends Application {
         try {
             Parent root = FXMLLoader.load(getClass().getClassLoader().getResource("BrowseView.fxml"));
             primaryStage.setTitle("attics");
-            primaryStage.setScene(new Scene(root, 1000, 600));
+            primaryStage.setScene(new Scene(root, 1200, 800));
             primaryStage.show();
         }
         catch (Exception e) {
