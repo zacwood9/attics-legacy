@@ -16,7 +16,9 @@ public class SongListViewCell extends ListCell<Song> {
             setGraphic(null);
         } else {
 
-            setText(song.getTitle());
+            if (song.getTitle() == null || song.getTitle().equals("")) {
+                setText("Untitled");
+            } else setText(song.getTitle() + " - " + song.getLength());
 
         }
     }

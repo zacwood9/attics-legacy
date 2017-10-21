@@ -102,6 +102,8 @@ public class UIController {
         // when a year is clicked
         yearsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
 
+            showsListView.setItems(FXCollections.observableArrayList());
+
             int yearId = newValue.getId();
             ResultSet results = Database.getInstance().rawSQL("SELECT * FROM shows WHERE yearId=" + yearId);
 

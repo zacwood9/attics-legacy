@@ -54,11 +54,11 @@ public class ItemListViewCell extends ListCell<Item>{
                 source = "AUD";
             }
 
-            identifier.setText(source);
+            identifier.setText(item.getIdentifier());
             downloads.setText(Integer.toString(item.getDownloads()) + " downloads");
 
             // get avg. rating
-            rating.setText(item.getAvgRating());
+            rating.setText(item.getAvgRating() + " / " + item.getNumReviews() + " reviews");
 
             setText(null);
             setGraphic(vBox);
