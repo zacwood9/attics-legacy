@@ -41,17 +41,8 @@ public class YearListViewCell extends ListCell<Year> {
             }
 
             this.year.setText(year.getYear());
-            String sql = String.format("SELECT COUNT(*) AS total FROM shows where yearId=%d", year.getId());
-            ResultSet result = Database.getInstance().rawSQL(sql);
-            try {
-                result.next();
-                int num = result.getInt("total");
-                numberOfShows.setText(num + " shows");
-                result.close();
-            } catch (SQLException e) {
-                System.err.println(e.toString());
-            }
 
+            numberOfShows.setText(Database.getInstance().getShowCountForYear(year.getId()) + " shows");
             setText(null);
             setGraphic(vBox);
 

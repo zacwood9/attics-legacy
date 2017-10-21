@@ -19,6 +19,14 @@ public class Year implements Comparable<Year> {
         return year;
     }
 
+    public boolean equals(Object o) {
+        if (o instanceof Year) {
+            Year other = (Year)o;
+            return id == other.id;
+        }
+        return false;
+    }
+
     public int compareTo(Year y) {
         return year.compareTo(y.getYear());
     }

@@ -5,10 +5,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListView;
-import javafx.scene.control.Slider;
+import javafx.scene.control.*;
 import javafx.scene.media.MediaPlayer;
 
 import javax.xml.crypto.Data;
@@ -58,6 +55,12 @@ public class UIController {
     Label status;
 
     @FXML
+    Label itemsSongsLabel;
+
+    @FXML
+    TextField searchBar;
+
+    @FXML
     Button playPauseButton;
 
     @FXML
@@ -76,33 +79,14 @@ public class UIController {
 
     public void initialize() {
         // populate year list
-        List<Year> years = new LinkedList<>();
+        List<Year> years = Database.getInstance().getYearsWithCollection(collection);
 
-        String sql = String.format("SELECT * FROM years WHERE collection='%s'", collection);
-        ResultSet results = Database.getInstance().rawSQL(sql);
+        ObservableList<Year> yearList = FXCollections.observableArrayList();
+        yearList.addAll(years);
 
-        try {
-            // iterate through every year
-            while (results.next()) {
-                // add it to the set
-                int id = results.getInt("id");
-                String year = results.getString("year");
-                years.add(new Year(id, year, collection));
-            }
-
-            Collections.sort(years);
-
-            ObservableList<Year> yearList = FXCollections.observableArrayList();
-            yearList.addAll(years);
-
-            // add the set to the list view
-            yearsListView.setItems(yearList);
-            yearsListView.setCellFactory(param -> new YearListViewCell());
-
-            results.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        // add the set to the list view
+        yearsListView.setItems(yearList);
+        yearsListView.setCellFactory(param -> new YearListViewCell());
 
         initializeListeners();
 
@@ -116,37 +100,8 @@ public class UIController {
 
         // when a year is clicked
         yearsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
-
-            // set the show list to an empty list
-            showsListView.setItems(FXCollections.observableArrayList());
-
-            // get all shows that belong to the selected year
-            int yearId = newValue.getId();
-            ResultSet results = Database.getInstance().rawSQL("SELECT id FROM shows WHERE yearId=" + yearId);
-
-            List<Show> shows = new LinkedList<>();
-            try {
-                // iterate through every show
-                while (results.next()) {
-                    // add it to the list
-                    int id = results.getInt("id");
-                    shows.add(Database.getInstance().getShowWithId(id));
-                }
-
-                // sort the list of shows
-                Collections.sort(shows);
-
-                ObservableList<Show> showList = FXCollections.observableArrayList();
-                showList.addAll(shows);
-
-                // add the list of shows to the list view
-                showsListView.setItems(showList);
-                showsListView.setCellFactory(param -> new ShowListViewCell());
-
-                results.close();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            if (newValue != null)
+                displayShowList(newValue);
         }));
 
         // when a show is clicked
@@ -231,46 +186,33 @@ public class UIController {
      * @param show
      */
     private void displayItemList(Show show) {
-        // get all items that belong to the given show
         int showId = show.getId();
-        ResultSet results = Database.getInstance().rawSQL("SELECT * FROM items WHERE showId=" + showId);
 
-        List<Item> items = new LinkedList<>();
-        try {
-            // iterate through every show
-            while (results.next()) {
-                // add it to the list of items
-                items.add(Database.itemFromResult(results));
-            }
-            // sort the items
-            Collections.sort(items);
+        // get all items that belong to the given show
+        List<Item> items = Database.getInstance().getItemsWithShowId(showId);
 
-            ObservableList<Item> itemList = FXCollections.observableArrayList();
-            itemList.addAll(items);
+        ObservableList<Item> itemList = FXCollections.observableArrayList();
+        itemList.addAll(items);
 
-            // clear selection so the selection model doesn't
-            // automatically load the song list for the previously
-            // selected item.
-            itemsListView.getSelectionModel().clearSelection();
+        // clear selection so the selection model doesn't
+        // automatically load the song list for the previously
+        // selected item.
+        itemsListView.getSelectionModel().clearSelection();
 
-            // add the list of items to the list view
-            itemsListView.setItems(itemList);
-            itemsListView.setCellFactory(param -> new ItemListViewCell());
+        // add the list of items to the list view
+        itemsListView.setItems(itemList);
+        itemsListView.setCellFactory(param -> new ItemListViewCell());
 
-            // set the item list to be visible
-            if (!itemsListView.isVisible()) {
-                songsListView.setVisible(false);
-                otherSources.setVisible(false);
-                itemsListView.setVisible(true);
-            }
-
-            selectedShow = show;
-
-            results.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
+        // set the item list to be visible
+        if (!itemsListView.isVisible()) {
+            songsListView.setVisible(false);
+            otherSources.setVisible(false);
+            itemsListView.setVisible(true);
         }
+        itemsSongsLabel.setText("Items");
+        selectedShow = show;
     }
+
 
     /**
      * Displays the list of songs for a given item.
@@ -308,11 +250,29 @@ public class UIController {
             songsListView.setVisible(true);
             otherSources.setVisible(true);
             status.setText("");
+            itemsSongsLabel.setText("Songs");
         });
 
         // start the task
         new Thread(task).start();
 
+    }
+
+    private void displayShowList(Year year) {
+        // set the show list to an empty list
+        showsListView.setItems(FXCollections.observableArrayList());
+
+        // get all shows that belong to the selected year
+        int yearId = year.getId();
+
+        List<Show> shows = Database.getInstance().getShowsWithYearId(yearId);
+
+        ObservableList<Show> showList = FXCollections.observableArrayList();
+        showList.addAll(shows);
+
+        // add the list of shows to the list view
+        showsListView.setItems(showList);
+        showsListView.setCellFactory(param -> new ShowListViewCell());
     }
 
     /**
@@ -323,6 +283,45 @@ public class UIController {
         songsListView.setVisible(false);
         otherSources.setVisible(false);
         displayItemList(selectedShow);
+    }
+
+    @FXML
+    private void search() {
+        String text = searchBar.getText();
+        // search for a date
+        if (text.length() == 10) {
+            Show show = Database.getInstance().getShowWithDate(text);
+            if (show != null) {
+                Year year = Database.getInstance().getYearWithId(show.getYearId());
+                if (year != null) {
+                    yearsListView.getSelectionModel().select(year);
+                    yearsListView.scrollTo(year);
+                    showsListView.getSelectionModel().select(show);
+                    showsListView.scrollTo(show);
+                }
+            }
+
+        } else if (text.length() > 10) { // archive link
+            if (text.contains("gd")) {
+                String identifier = text.substring(text.indexOf("gd"), text.length());
+                Item item = Database.getInstance().getItemWithIdentifier(identifier);
+
+                if (item != null) {
+                    Show show = Database.getInstance().getShowWithId(item.getShowId());
+
+                    if (show != null) {
+                        Year year = Database.getInstance().getYearWithId(show.getYearId());
+
+                        yearsListView.getSelectionModel().select(year);
+                        yearsListView.scrollTo(year);
+                        showsListView.getSelectionModel().select(show);
+                        showsListView.scrollTo(show);
+
+                        itemsListView.getSelectionModel().select(item);
+                    }
+                }
+            }
+        }
     }
 
     /**
@@ -336,6 +335,13 @@ public class UIController {
         showLabel.setText(song.getAlbum());
         playPauseButton.setText("Pause");
     }
+
+//    private int indexOf(Object o) {
+//        if (o instanceof Year) {
+//            Year year = (Year)o;
+//            yearsListView.
+//        }
+//    }
 
     /**
      * Sets seeker bar

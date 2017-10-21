@@ -56,23 +56,13 @@ public class ShowListViewCell extends ListCell<Show> {
             if(loader == null) {
                 setLoader();
             }
-            
-            String sql = String.format("SELECT COUNT(*) AS total FROM items where showId=%d", show.getId());
-            ResultSet result = Database.getInstance().rawSQL(sql);
-            try {
-                result.next();
-                int itemNum = result.getInt("total");
-                numberOfItems.setText(itemNum + " recordings");
-                result.close();
-            } catch (SQLException e) {
-                System.err.println(e.toString());
-            }
+
+            int itemNum = Database.getInstance().getItemCountForShow(show.getId());
+            numberOfItems.setText(itemNum + " recordings");
 
             // set date and count fields
             date.setText(show.getDate());
 
-            
-            //rating.setText("");
             venue.setText(show.getVenue());
 
             setText(null);

@@ -6,19 +6,30 @@
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.control.Slider?>
 <?import javafx.scene.control.SplitPane?>
+<?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
 <VBox alignment="CENTER" prefHeight="800.0" prefWidth="1400.0" spacing="5.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.zacwood.attics.UIController">
   <children>
-      <Label fx:id="status" alignment="CENTER" text="Status" textFill="#9f9f9f">
-         <opaqueInsets>
-            <Insets />
-         </opaqueInsets>
-      </Label>
+      <HBox alignment="CENTER">
+         <children>
+            <TextField fx:id="searchBar" onAction="#search" prefHeight="27.0" prefWidth="348.0" promptText="Enter an archive.org link or date (YYYY-MM-DD)..." />
+            <Pane prefHeight="0.0" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+            <Label fx:id="status" alignment="CENTER" text="Status" textFill="#9f9f9f">
+               <opaqueInsets>
+                  <Insets />
+               </opaqueInsets>
+            </Label>
+         </children>
+         <padding>
+            <Insets left="20.0" right="50.0" />
+         </padding>
+      </HBox>
     <SplitPane dividerPositions="0.2561, 0.7" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <items>
         <AnchorPane>
@@ -44,7 +55,7 @@
               <items>
                 <AnchorPane fx:id="itemsSongsPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
-                        <Label alignment="CENTER" layoutX="14.0" layoutY="14.0" style="&#10;" text="Items / Songs" textAlignment="CENTER" wrapText="false">
+                        <Label fx:id="itemsSongsLabel" alignment="CENTER" layoutX="14.0" layoutY="14.0" style="&#10;" text="Items / Songs" textAlignment="CENTER" wrapText="false">
                            <font>
                               <Font size="18.0" fx:id="x11" />
                            </font>
