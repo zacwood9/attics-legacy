@@ -51,6 +51,7 @@ public class ShowListViewCell extends ListCell<Show> {
 
         if (empty || show == null) {
             setText(null);
+            setGraphic(null);
         } else {
             if(loader == null) {
                 setLoader();
