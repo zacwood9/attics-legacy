@@ -12,7 +12,7 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<VBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0" spacing="5.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.zacwood.attics.UIController">
+<VBox alignment="CENTER" prefHeight="800.0" prefWidth="1400.0" spacing="5.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.zacwood.attics.UIController">
   <children>
       <Label fx:id="status" alignment="CENTER" text="Status" textFill="#9f9f9f">
          <opaqueInsets>
@@ -40,7 +40,7 @@
                   <ListView fx:id="showsListView" layoutX="112.0" layoutY="46.0" prefHeight="499.0" prefWidth="430.0" stylesheets="@listview.css" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
         </children>
       </AnchorPane>
-            <SplitPane dividerPositions="0.6775956284153005" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+            <SplitPane dividerPositions="0.7758318739054291" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
               <items>
                 <AnchorPane fx:id="itemsSongsPane" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                      <children>
@@ -54,11 +54,7 @@
                         </Label>
                         <ListView fx:id="itemsListView" prefHeight="271.0" prefWidth="445.0" stylesheets="@listview.css" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
                         <ListView fx:id="songsListView" layoutX="10.0" layoutY="10.0" prefHeight="271.0" prefWidth="445.0" stylesheets="@listview.css" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
-                        <Label fx:id="loading" alignment="CENTER" layoutX="14.0" layoutY="189.0" style="&#10;" text="Loading..." textAlignment="CENTER" textFill="#9f9f9f" visible="false" wrapText="false">
-                           <font>
-                              <Font size="16.0" fx:id="x111" />
-                           </font>
-                        </Label>
+                        <Button fx:id="otherSources" layoutX="160.0" layoutY="12.0" mnemonicParsing="false" onAction="#viewOtherSources" prefHeight="27.0" prefWidth="147.0" text="View Other Sources" visible="false" />
                      </children>
                   </AnchorPane>
                   <VBox alignment="CENTER">
@@ -69,8 +65,8 @@
                                  <children>
                                     <VBox alignment="CENTER" spacing="5.0">
                                        <children>
-                                          <Label fx:id="songLabel" text="Song" />
-                                          <Label fx:id="showLabel" text="Link to Show" />
+                                          <Label fx:id="songLabel" text="---------" />
+                                          <Label fx:id="showLabel" text="---------" />
                                           <Button fx:id="playPauseButton" mnemonicParsing="false" prefHeight="27.0" prefWidth="96.0" text="Play/Pause" />
                                        </children>
                                     </VBox>
@@ -84,6 +80,9 @@
                               </VBox>
                               <Slider fx:id="volumeSlider" orientation="VERTICAL" prefHeight="115.0" prefWidth="16.0" value="100.0" HBox.hgrow="NEVER" />
                            </children>
+                           <padding>
+                              <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                           </padding>
                         </HBox>
                      </children>
                   </VBox>

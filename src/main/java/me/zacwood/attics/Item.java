@@ -7,13 +7,16 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import javax.json.JsonValue;
+import javax.print.DocFlavor;
 import java.io.*;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
 public class Item implements Comparable<Item> {
 
     private int id;
+    private int showId;
     private String identifier;
     private int numReviews;
     private int downloads;
@@ -23,14 +26,23 @@ public class Item implements Comparable<Item> {
     private JsonObject metadata;
     private List<Song> songs;
 
-    public Item(int id, String identifier, int downloads, String avgRating, int numReviews, String description, String source) {
+    public Item(int id, int showId, String identifier, int downloads, String avgRating, int numReviews, String description, String source) {
         this.id = id;
+        this.showId = showId;
         this.identifier = identifier;
         this.numReviews = numReviews;
         this.downloads = downloads;
         this.avgRating = avgRating;
         this.description = description;
         this.source = source;
+    }
+
+    public int getShowId() {
+        return showId;
+    }
+
+    public void setShowId(int showId) {
+        this.showId = showId;
     }
 
     public String getIdentifier() {
@@ -117,6 +129,17 @@ public class Item implements Comparable<Item> {
         return songs;
     }
 
+    public HashMap<String, String> getSourceInfo() {
+        HashMap<String, String> result = new HashMap();
+        result.put("identifier", identifier);
+        result.put("description", description);
+        result.put("date", getMetadata().getString("date"));
+        result.put("source", getMetadata().getString("source"));
+        result.put("taper", getMetadata().getString("taper"));
+        result.put("lineage", getMetadata().getString("lineage"));
+        return result;
+    }
+
     public int getId() {
         return id;
     }
@@ -143,6 +166,15 @@ public class Item implements Comparable<Item> {
     public String toString() {
         return String.format("Identifier: %s\n\nDownloads: %d\n\nAverage Rating: %s",
                 identifier, downloads, avgRating);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof Item) {
+            Item other = (Item)o;
+            return id == other.id;
+        }
+        return false;
     }
 
     @Override

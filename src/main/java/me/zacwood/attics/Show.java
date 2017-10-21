@@ -48,6 +48,14 @@ public class Show implements Comparable<Show> {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (o instanceof Show) {
+            Show other = (Show)o;
+            return id == other.id;
+        }
+        return false;
+    }
+    @Override
     public int compareTo(Show o) {
         return getDate().compareTo(o.getDate());
     }

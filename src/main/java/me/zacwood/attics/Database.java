@@ -25,6 +25,7 @@ public class Database {
     public static Item itemFromResult(ResultSet results) {
         try {
             int id = results.getInt("id");
+            int showId = results.getInt("showId");
             String identifier = results.getString("identifier");
             int downloads = results.getInt("downloads");
             int numReviews = results.getInt("num_reviews");
@@ -32,7 +33,21 @@ public class Database {
             String description = results.getString("description");
             String source = results.getString("source");
 
-            return new Item(id, identifier, downloads, avgRating, numReviews, description, source);
+            return new Item(id, showId, identifier, downloads, avgRating, numReviews, description, source);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static Show showFromResult(ResultSet results) {
+        try {
+            int id = results.getInt("id");
+            int yearId = results.getInt("yearId");
+            String date = results.getString("date");
+            String venue = results.getString("venue");
+
+            return new Show(id, yearId, date, venue);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -56,6 +71,18 @@ public class Database {
         try {
             rs.next();
             return itemFromResult(rs);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public Show getShowWithId(int id) {
+        String sql = String.format("SELECT * FROM shows where id = %d", id);
+        ResultSet rs = rawSQL(sql);
+        try {
+            rs.next();
+            return showFromResult(rs);
         } catch (SQLException e) {
             e.printStackTrace();
         }

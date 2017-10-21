@@ -11,6 +11,7 @@ import javafx.scene.control.ListView;
 import javafx.scene.control.Slider;
 import javafx.scene.media.MediaPlayer;
 
+import javax.xml.crypto.Data;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -59,6 +60,11 @@ public class UIController {
     @FXML
     Button playPauseButton;
 
+    @FXML
+    Button otherSources;
+
+    Show selectedShow;
+
     // TODO: make selectable in UI
     private String collection = "GratefulDead";
 
@@ -102,33 +108,38 @@ public class UIController {
 
     }
 
+    /**
+     * Big ugly method to setup the various change listeners.
+     * There's probably a cleaner, more readable way to do this.
+     */
     public void initializeListeners() {
 
         // when a year is clicked
         yearsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
 
+            // set the show list to an empty list
             showsListView.setItems(FXCollections.observableArrayList());
 
+            // get all shows that belong to the selected year
             int yearId = newValue.getId();
-            ResultSet results = Database.getInstance().rawSQL("SELECT * FROM shows WHERE yearId=" + yearId);
+            ResultSet results = Database.getInstance().rawSQL("SELECT id FROM shows WHERE yearId=" + yearId);
 
             List<Show> shows = new LinkedList<>();
             try {
                 // iterate through every show
                 while (results.next()) {
-                    // add it to the set
+                    // add it to the list
                     int id = results.getInt("id");
-                    String date = results.getString("date");
-                    String venue = results.getString("venue");
-                    shows.add(new Show(id, yearId, date, venue));
+                    shows.add(Database.getInstance().getShowWithId(id));
                 }
 
+                // sort the list of shows
                 Collections.sort(shows);
 
                 ObservableList<Show> showList = FXCollections.observableArrayList();
                 showList.addAll(shows);
 
-                // add the set to the list view
+                // add the list of shows to the list view
                 showsListView.setItems(showList);
                 showsListView.setCellFactory(param -> new ShowListViewCell());
 
@@ -142,35 +153,7 @@ public class UIController {
         showsListView.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
             //itemsListView.setItems(FXCollections.observableArrayList());
             if (newValue != null) {
-                int showId = newValue.getId();
-                ResultSet results = Database.getInstance().rawSQL("SELECT * FROM items WHERE showId=" + showId);
-
-                List<Item> items = new LinkedList<>();
-                try {
-                    // iterate through every show
-                    while (results.next()) {
-                        // add it to the set
-                        items.add(Database.itemFromResult(results));
-                    }
-
-                    Collections.sort(items);
-
-                    ObservableList<Item> itemList = FXCollections.observableArrayList();
-                    itemList.addAll(items);
-
-                    // add the set to the list view
-                    itemsListView.setItems(itemList);
-                    itemsListView.setCellFactory(param -> new ItemListViewCell());
-
-                    if (!itemsListView.isVisible()) {
-                        songsListView.setVisible(false);
-                        itemsListView.setVisible(true);
-                    }
-
-                    results.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
+                displayItemList(newValue);
             }
         }));
 
@@ -185,14 +168,15 @@ public class UIController {
         // volume slider listener
         volumeSlider.valueProperty().addListener(observable -> mediaController.setVolume(volumeSlider.getValue() / 100));
 
+        // when the mouse is pressed on the slider, pause the song
         seekSlider.setOnMousePressed(event -> {
             mediaController.pause();
         });
+
         // seek slider listener
         seekSlider.setOnMouseReleased(event -> {
             mediaController.seekTo(seekSlider.getValue() / 100);
             mediaController.play(mediaController.getPlayingSong());
-
         });
 
         // double click listener for songs
@@ -207,6 +191,7 @@ public class UIController {
             }
         });
 
+        // when the play/pause button is clicked
         playPauseButton.setOnAction(event -> {
             if (mediaController.getPlayingSong().getMediaPlayer().getStatus() == MediaPlayer.Status.PLAYING) {
                 mediaController.pause();
@@ -217,9 +202,80 @@ public class UIController {
             }
         });
 
+        // when the show or song labels are clicked
+        // maybe these should do different things?
+        showLabel.setOnMouseClicked(event -> goToPlayingSong());
+        songLabel.setOnMouseClicked(event -> goToPlayingSong());
 
     }
 
+    /**
+     * If the playing item is already selected, just scroll to the playing song.
+     * Else, display the song list of the playing item, then scroll to the playing song.
+     */
+    private void goToPlayingSong() {
+        if (mediaController.getPlayingItem() != null) {
+            if(mediaController.getPlayingItem().equals(itemsListView.getSelectionModel().getSelectedItem())) {
+                songsListView.getSelectionModel().select(mediaController.getPlayingSong());
+                songsListView.scrollTo(mediaController.getPlayingSong());
+            } else {
+                displaySongList(mediaController.getPlayingItem());
+                selectedShow = Database.getInstance().getShowWithId(mediaController.getPlayingItem().getShowId());
+                songsListView.scrollTo(mediaController.getPlayingSong());
+            }
+        }
+    }
+
+    /**
+     * Displays the list of items for a given show.
+     * @param show
+     */
+    private void displayItemList(Show show) {
+        // get all items that belong to the given show
+        int showId = show.getId();
+        ResultSet results = Database.getInstance().rawSQL("SELECT * FROM items WHERE showId=" + showId);
+
+        List<Item> items = new LinkedList<>();
+        try {
+            // iterate through every show
+            while (results.next()) {
+                // add it to the list of items
+                items.add(Database.itemFromResult(results));
+            }
+            // sort the items
+            Collections.sort(items);
+
+            ObservableList<Item> itemList = FXCollections.observableArrayList();
+            itemList.addAll(items);
+
+            // clear selection so the selection model doesn't
+            // automatically load the song list for the previously
+            // selected item.
+            itemsListView.getSelectionModel().clearSelection();
+
+            // add the list of items to the list view
+            itemsListView.setItems(itemList);
+            itemsListView.setCellFactory(param -> new ItemListViewCell());
+
+            // set the item list to be visible
+            if (!itemsListView.isVisible()) {
+                songsListView.setVisible(false);
+                otherSources.setVisible(false);
+                itemsListView.setVisible(true);
+            }
+
+            selectedShow = show;
+
+            results.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Displays the list of songs for a given item.
+     * @param item
+     */
     private void displaySongList(Item item) {
         // hide item list, show loading text
         itemsListView.setVisible(false);
@@ -227,6 +283,9 @@ public class UIController {
 
         ObservableList<Song> songObservableList = FXCollections.observableArrayList();
 
+        // in order to properly update the UI and that the window remains
+        // responsive, create a task to perform the (possibly) blocking
+        // call to getSongs().
         Task task = new Task<Void>() {
             @Override
             protected Void call() throws Exception {
@@ -237,6 +296,9 @@ public class UIController {
                 return null;
             }
         };
+
+        // when the task is finished, add the song list
+        // to the UI and set it to be visible.
         task.setOnSucceeded(event -> {
             // set the new list
             songsListView.setItems(songObservableList);
@@ -244,16 +306,39 @@ public class UIController {
 
             // display song list
             songsListView.setVisible(true);
+            otherSources.setVisible(true);
             status.setText("");
         });
+
+        // start the task
         new Thread(task).start();
 
     }
 
+    /**
+     * Show all the items for the show of the currently playing item
+     */
+    @FXML
+    private void viewOtherSources() {
+        songsListView.setVisible(false);
+        otherSources.setVisible(false);
+        displayItemList(selectedShow);
+    }
+
+    /**
+     * Change the UI to a new song.
+     * @param song
+     */
+    public void setSong(Song song) {
+        // Resets the seeker, and sets the labels to the new song's info
+        setSeekerPosition(0);
+        songLabel.setText(song.getTitle());
+        showLabel.setText(song.getAlbum());
+        playPauseButton.setText("Pause");
+    }
 
     /**
      * Sets seeker bar
-     *
      * @param dur percentage of silder
      */
     public void setSeekerPosition(double dur) {
@@ -263,285 +348,6 @@ public class UIController {
     public void setSeekerText(String text) {
         seekerText.setText(text);
     }
-
-
-    public void setSong(Song song) {
-        setSeekerPosition(0);
-        songLabel.setText(song.getTitle());
-        showLabel.setText(song.getAlbum());
-        playPauseButton.setText("Pause");
-    }
-
-    public void setPlayPauseText(String text) {
-        playPauseButton.setText(text);
-    }
-
-//     public void initialize() {
-//         mediaController = new MediaController(this);
-
-
-//         // initialize root item
-//         root = new TreeItem<>(currentCollection);
-//         root.setExpanded(true);
-
-//         years = new TreeMap<>();
-
-//         try {
-//             Statement statement = conn.createStatement();
-//             String sql = String.format("SELECT DISTINCT date FROM %s;", currentCollection);
-//             ResultSet rs = statement.executeQuery(sql);
-
-//             // iterate through every date that an item exists for
-//             while (rs.next()) {
-
-//                 // get the year of the show
-//                 int year = Integer.parseInt(rs.getString("date").substring(0, 4));
-
-//                 // if the year hasn't been added already, add an empty list
-//                 years.computeIfAbsent(year, k -> years.put(year, new ArrayList<>()));
-
-//                 String date = rs.getString("date");
-
-//                 Show show = new Show(date);
-
-//                 // add show to its year
-//                 years.get(year).add(show);
-//             }
-
-//             // iterate through all the years in the set
-//             for (int year : years.keySet()) {
-//                 // create the node for the year
-//                 TreeItem<String> yearNode = new TreeItem<>(Integer.toString(year));
-
-//                 // get the list of shows for the year
-//                 List<Show> showsInYear = years.get(year);
-
-//                 // sort the shows from the year
-//                 Collections.sort(showsInYear);
-
-//                 // add all shows from that year to the year node
-//                 for (Show show : showsInYear) {
-//                     yearNode.getChildren().add(show);
-//                 }
-
-//                 root.getChildren().add(yearNode);
-//             }
-
-//             rs.close();
-//         } catch (SQLException e) {
-//             System.out.println(e.toString());
-//         }
-
-//         dateList.setRoot(root);
-//         dateList.getSelectionModel().selectAll();
-//         dateList.getSelectionModel().setSelectionMode(SelectionMode.SINGLE);
-
-//         initializeListeners();
-//     }
-
-//     private void initializeListeners() {
-//         // when a date is clicked
-//         dateList.getSelectionModel().selectedItemProperty().addListener(((observable, oldValue, newValue) -> {
-//             // if the clicked element is not a year
-//             if (newValue.getValue().length() > 4) {
-//                 // show items for the date
-//                 Show show = findShowWithDate(newValue.getValue());
-//                 showItems(show);
-//             } else { //TODO: show all shows for the year
-
-//             }
-//         }));
-
-//         // when an item is clicked
-//         itemList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//             try {
-//                 // get the item with the clicked identifier
-//                 Statement statement = conn.createStatement();
-//                 String sql = String.format("SELECT * FROM %s WHERE identifier='%s';", currentCollection, newValue);
-//                 ResultSet rs = statement.executeQuery(sql);
-
-//                 rs.next();
-
-//                 // create an item with the result
-//                 selectedItem = new Item(rs.getString("identifier"), rs.getString("date"), rs.getInt("downloads"),
-//                         rs.getString("avg_rating"), rs.getString("description"));
-
-//                 // fill the info text with item's info
-//                 itemInfo.setText(selectedItem.toString());
-
-//                 rs.close();
-//             } catch (SQLException e) {
-//                 System.err.println(e.getMessage());
-//             }
-//         });
-
-
-//         // when the song list is clicked
-//         songList.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-//             try {
-//                 // find the song that was clicked, set it as the selected song
-//                 for (Song song : selectedItem.getSongs()) {
-//                     if (song.getTitle().equals(observable.getValue())) {
-//                         selectedSong = song;
-//                         break;
-//                     }
-//                 }
-//             } catch (Exception e) {
-//                 System.err.println(e);
-//             }
-//         });
-
-//         // volume slider listener
-//         volumeSlider.valueProperty().addListener(observable -> mediaController.setVolume(volumeSlider.getValue() / 100));
-
-//         seekSlider.setOnMousePressed(event -> {
-//             mediaController.pause();
-//         });
-//         // seek slider listener
-//         seekSlider.setOnMouseReleased(event -> {
-//             mediaController.seekTo(seekSlider.getValue() / 100);
-//             mediaController.resume();
-
-//         });
-
-//         // double click listener for items
-//         itemList.setOnMouseClicked(event -> {
-//             if (event.getClickCount() == 2) {
-//                 try {
-//                     showSongs();
-//                 } catch (Exception e) {
-//                     System.err.println(e.toString());
-//                 }
-//             }
-//         });
-
-
-//         // double click listener for songs
-//         songList.setOnMouseClicked(event -> {
-//             if (event.getClickCount() == 2) {
-//                 try {
-//                     mediaController.play(selectedSong);
-//                 } catch (Exception e) {
-//                     System.err.println(e.toString());
-//                 }
-
-//             }
-//         });
-//     }
-
-//     /**
-//      * Method to display all items for a given show
-//      *
-//      * @param show
-//      */
-//     private void showItems(Show show) {
-
-//         List<Item> items = new LinkedList<>();
-
-//         try {
-//             // select all items from db with the given date
-//             Statement statement = conn.createStatement();
-//             String sql = String.format("SELECT * FROM %s WHERE date='%s'", currentCollection, show.getDate());
-//             ResultSet rs = statement.executeQuery(sql);
-
-//             // add all items to the linked list
-//             while (rs.next()) {
-//                 Item item = new Item(rs.getString("identifier"), rs.getString("date"), rs.getInt("downloads"),
-//                         rs.getString("avg_rating"), rs.getString("description"));
-//                 items.add(item);
-//             }
-
-//             // sort the list of items by number of downloads
-//             Collections.sort(items);
-
-//             // store the list in an OberserableList
-//             ObservableList<String> observableList = FXCollections.observableArrayList();
-//             for (Item item : items) {
-//                 observableList.add(item.getIdentifier());
-//             }
-
-//             // display the list
-//             itemList.setItems(observableList);
-//         } catch (SQLException e) {
-//             System.err.println(e.getMessage());
-//         }
-
-//     }
-
-//     /**
-//      * Method to display all songs for the current item
-//      *
-//      * @throws Exception
-//      */
-//     @FXML
-//     private void showSongs() throws Exception {
-
-//         ObservableList<String> observableSongList = FXCollections.observableArrayList();
-//         for (Song song : selectedItem.getSongs()) {
-//             observableSongList.add(song.getTitle());
-//         }
-
-//         songList.setItems(observableSongList);
-
-//         mediaController.setItem(selectedItem);
-//         selectedItemLabel.setText(selectedItem.getIdentifier());
-//     }
-
-//     @FXML
-//     private void playSong() throws Exception {
-// //        if (mediaController.getCurrentSong() != null) {
-// //            mediaController.play(mediaController.getCurrentSong());
-// //        }
-// //        else
-//         mediaController.play(selectedSong);
-
-//     }
-
-//     @FXML
-//     private void pauseSong() throws Exception {
-//         mediaController.pause();
-//     }
-
-//     @FXML
-//     private void downloadItem() throws Exception {
-//         for (Song song : selectedItem.getSongs()) {
-//             song.downloadAsync();
-//         }
-//     }
-
-//     /**
-//      * Returns a show that has the given date
-//      * @param date
-//      * @return
-//      */
-//     private Show findShowWithDate(String date) {
-//         for (int year : years.keySet()) {
-//             for (Show show : years.get(year)) {
-//                 if (show.getDate().equals(date)) {
-//                     return show;
-//                 }
-//             }
-//         }
-//         return null;
-//     }
-
-//     public void setCurrentSongLabel(String text) {
-//         this.currentSongLabel.setText(text);
-//     }
-
-//     public void setCurrentShowLabel(String text) {
-//         this.currentShowLabel.setText(text);
-//     }
-
-//     public void setCurrentAction(String text) {
-//         this.currentAction.setText(text);
-//     }
-
-//     public void setCurrentSongTime(String time) {
-//         currentSongTime.setText(time);
-//     }
-
-
 }
 
 

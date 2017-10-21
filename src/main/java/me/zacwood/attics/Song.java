@@ -151,7 +151,11 @@ public class Song {
 
     }
 
-    public boolean equals(Song s) {
-        return s.getName().equals(name) && s.getTrack() == track;
+    public boolean equals(Object o) {
+        if (o instanceof Song) {
+            Song s = (Song)o;
+            return s.getName().equals(name) && s.getTrack() == track && s.getItemIdentifier().equals(itemIdentifier);
+        }
+        return false;
     }
 }
