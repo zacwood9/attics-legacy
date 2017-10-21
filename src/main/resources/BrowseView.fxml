@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.ListView?>
@@ -11,8 +12,13 @@
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
 
-<VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.zacwood.attics.UIController">
+<VBox alignment="CENTER" prefHeight="600.0" prefWidth="900.0" spacing="5.0" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1" fx:controller="me.zacwood.attics.UIController">
   <children>
+      <Label fx:id="status" alignment="CENTER" text="Status" textFill="#9f9f9f">
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+      </Label>
     <SplitPane dividerPositions="0.2561, 0.7" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
       <items>
         <AnchorPane>
@@ -48,6 +54,11 @@
                         </Label>
                         <ListView fx:id="itemsListView" prefHeight="271.0" prefWidth="445.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
                         <ListView fx:id="songsListView" layoutX="10.0" layoutY="10.0" prefHeight="271.0" prefWidth="445.0" visible="false" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="50.0" />
+                        <Label fx:id="loading" alignment="CENTER" layoutX="14.0" layoutY="189.0" style="&#10;" text="Loading..." textAlignment="CENTER" textFill="#9f9f9f" visible="false" wrapText="false">
+                           <font>
+                              <Font size="16.0" fx:id="x111" />
+                           </font>
+                        </Label>
                      </children>
                   </AnchorPane>
                   <VBox alignment="CENTER">

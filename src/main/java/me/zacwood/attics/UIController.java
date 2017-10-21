@@ -1,7 +1,9 @@
 package me.zacwood.attics;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -50,6 +52,9 @@ public class UIController {
 
     @FXML
     Label seekerText;
+
+    @FXML
+    Label status;
 
     @FXML
     Button playPauseButton;
@@ -216,13 +221,32 @@ public class UIController {
     }
 
     private void displaySongList(Item item) {
-        List<Song> songs = item.getSongs();
-        ObservableList<Song> songObservableList = FXCollections.observableArrayList();
-        songObservableList.addAll(songs);
-        songsListView.setItems(songObservableList);
-        songsListView.setCellFactory(param -> new SongListViewCell());
+        // hide item list, show loading text
         itemsListView.setVisible(false);
-        songsListView.setVisible(true);
+        status.setText("Loading " + item.getIdentifier() + "...");
+
+        ObservableList<Song> songObservableList = FXCollections.observableArrayList();
+
+        Task task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                List<Song> songs = item.getSongs();
+
+                // add the songs to an observable list
+                songObservableList.addAll(songs);
+                return null;
+            }
+        };
+        task.setOnSucceeded(event -> {
+            // set the new list
+            songsListView.setItems(songObservableList);
+            songsListView.setCellFactory(param -> new SongListViewCell());
+
+            // display song list
+            songsListView.setVisible(true);
+            status.setText("");
+        });
+        new Thread(task).start();
 
     }
 
