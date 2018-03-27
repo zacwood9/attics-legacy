@@ -5,7 +5,7 @@ For more information, see my blog post [Introducting Attics](http://zacwood.me/p
 Status: Version 1 has been released!  
 
 Download here:  
-[macOs](http://zacwood.me/attics/attics.dmg). 
+[macOs](http://zacwood.me/attics/attics.dmg).  
 [Windows](http://zacwood.me/attics/attics-win.zip). 
 
 
